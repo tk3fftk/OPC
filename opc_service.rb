@@ -5,6 +5,10 @@ require 'socket'
 require 'sinatra'
 require 'sinatra/reloader'
 
+# sinatra設定
+configure do
+  set :environment, :production # デフォルトでは外部からsinatraにアクセスできない
+end
 
 # params
 # カメラモードを変更
@@ -115,6 +119,24 @@ get '/get_img/:filename' do
   url = "/DCIM/100OLYMP/" + params['filename'] + ".JPG"
   puts url
   exec_get_command(url).body
+end
+
+# ライブビュー開始
+get '/start_liveview' do
+  content_type 'text/xml'
+  exec_get_command(exec_misc_start_liveivew).body
+end
+
+# ライブビュー終了
+get '/stop_liveview' do
+  content_type 'text/xml'
+  exec_get_command(exec_misc_stop_liveivew).body
+end
+
+# 撮影
+get '/takemotion' do
+  content_type 'text/xml'
+  exec_get_command(exec_takemotion).body
 end
 
 # コマンド実行 get
