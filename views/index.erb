@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+  </head>
+  <body>
+      # WebSockets Chat App
+      <div id="chat-log">
+        <input type="text" id="message">
+        <button id="disconnect">Disconnect</button>
+      </div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script>
+			function addMessage(msg) {
+  			$("#chat-log").append("" + msg + "");
+			}
+
+			var socket, host;
+			host = "ws://localhost:3001";
+
+			function connect(){
+				try{
+					socket = new WebSocket(host);
+
+					addMessage("Socket State: " + socket.readyState);
+		
+			    socket.onopen = function() {
+			      addMessage("Socket Status: " + socket.readyState + " (open)");
+			    }
+			
+			    socket.onclose = function() {
+			      addMessage("Socket Status: " + socket.readyState + " (closed)");
+			    }
+			
+			    socket.onmessage = function(msg) {
+			      addMessage("Received: " + msg.data);
+			    }
+				}
+				catch(e){
+					addMessage("error:" + e);
+				}
+			}
+
+			$("#disconnect").click(function() {
+				socket.close()
+			});
+    </script>
+  </body>
+</html>
