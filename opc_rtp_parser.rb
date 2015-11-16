@@ -23,14 +23,27 @@ class RTPParser
 		# 先頭パケット
 		if hash[:X] == "1"
 			#拡張ヘッダの処理
+			#TODO とりあえず拡張ヘッダをスキップする
+			for i in 12..pkt.size
+				j = i+1
+				b = pkt[i..j].unpack("B*")[0] #16bitずつチェック
+				if b == "1111111111011000" # FFD8
+					@@jpeg.push(pkt[i..-1])
+					break
+				end
+			end
 			#JPEGサブフレームの処理
+
 		# 最後のパケット
 		elsif hash[:M] == "1"
-			p @@jpeg.pack('m')
+			@@jpeg.push(pkt[12..-1])
+			base = Base64.strict_encode64(@@jpeg.join(""))
+			File.write("test.txt", base)
+
 			@@jpeg = []
 		# 途中パケット
 		else
-			# 残りパケットを@@jpegに追加
+			# 残りパケットを生バイナリで@@jpegに追加
 			@@jpeg.push(pkt[12..-1])
 		end
 	end
