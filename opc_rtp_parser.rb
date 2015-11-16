@@ -1,8 +1,18 @@
 # encoding: utf-8
+require 'websocket-client-simple'
 
 class RTPParser
 	# JPEGサブフレームを貯める
 	@@jpeg = []
+
+	def initialize
+		@ws = nil
+	end
+
+	def connect
+		# websocketコネクション
+		@ws = WebSocket::Client::Simple.connect 'ws://localhost:3001'
+	end
 
 	def parse pkt
 		# RTPパケットをパースする 
@@ -28,22 +38,22 @@ class RTPParser
 				j = i+1
 				b = pkt[i..j].unpack("B*")[0] #16bitずつチェック
 				if b == "1111111111011000" # FFD8
+					# ヘッダを除いたパケット(==JPEGサブフレーム)を生バイナリで@@jpegに追加
 					@@jpeg.push(pkt[i..-1])
 					break
 				end
 			end
-			#JPEGサブフレームの処理
-
 		# 最後のパケット
 		elsif hash[:M] == "1"
 			@@jpeg.push(pkt[12..-1])
 			base = Base64.strict_encode64(@@jpeg.join(""))
-			File.write("test.txt", base)
-
 			@@jpeg = []
+			connect if @ws.nil?
+			@ws.send base
+			#File.write("test.txt", base)
 		# 途中パケット
 		else
-			# 残りパケットを生バイナリで@@jpegに追加
+			# ヘッダを除いたパケット(==JPEGサブフレーム)を生バイナリで@@jpegに追加
 			@@jpeg.push(pkt[12..-1])
 		end
 	end

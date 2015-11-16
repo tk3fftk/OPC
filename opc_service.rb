@@ -188,7 +188,7 @@ EventMachine.run do
 		end
 
 		ws.onmessage do |msg|
-			puts "Received Message: #{msg}"
+			puts "Received Message: "
 			@clients.each do |socket|
 				socket.send msg
 			end
