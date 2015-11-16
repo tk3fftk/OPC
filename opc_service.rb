@@ -7,6 +7,8 @@ require 'sinatra/base'
 require 'sinatra/reloader'
 require 'thin'
 require 'em-websocket'
+require 'rtp'
+require 'websocket-client-simple'
 
 require './opc_udp'
 
@@ -50,7 +52,7 @@ EventMachine.run do
 		# ライブビュー
 		@@exec_misc_start_liveivew = "/exec_takemisc.cgi?com=startliveview&port=5555"
 		@@exec_misc_stop_liveivew = "/exec_takemisc.cgi?com=stopliveview"
-		
+
 		# イベント通知ポートOPEN
 		#event_socket = TCPSocket.open("192.168.0.10", 65000)
 
@@ -58,45 +60,45 @@ EventMachine.run do
 		get '/' do
 			erb :index
 		end
-		
+
 		# カメラモード変更
 		get '/switch_cameramode/:mode' do
 		  content_type 'text/xml'
 		  url = @@switch_cameramode + params['mode']
 		  exec_get_command(url).body
 		end
-		
+
 		# 電源OFF
 		get '/pwoff' do
 		  content_type 'text/xml'
 		  exec_get_command(@@exec_pwoff).body
 		end
-		
+
 		# TCPカメライベント通知開始 ポートは65000
 		get '/start_pushevent' do
 		  content_type 'text/xml'
 		  exec_get_command(@@start_pushevent).body
 		end
-		
+
 		# TCPカメライベント通知開始 ポートは65000
 		get '/stop_pushevent' do
 		  content_type 'text/xml'
 		  exec_get_command(@@stop_pushevent).body
 		end
-		
+
 		# カメラの状態取得
 		get '/get_state' do
 		  content_type 'text/xml'
 		  exec_get_command(@@get_state).body
 		end
-		
+
 		# カメラプロパティ ディスクリプタ 取得
 		get '/get_camprop/:propname' do
 		  content_type 'text/xml'
 		  url = @@get_camprop_desc + params['propname']
 		  exec_get_command(url).body
 		end
-		
+
 		# カメラプロパティ設定
 		get '/set_camprop/:propname/:value' do
 		  content_type 'text/xml'
@@ -105,13 +107,13 @@ EventMachine.run do
 		  puts body
 		  exec_post_command(url, body).body
 		end
-		
+
 		# 画像リスト取得
 		get '/get_imglist' do
 		  content_type 'text/plain'
 		  exec_get_command(@@get_imglist).body
 		end
-		
+
 		# デバイス表示用画像取得 TODO
 		get '/get_screennail/:filename' do
 		  content_type 'image/jpeg'
@@ -119,7 +121,7 @@ EventMachine.run do
 		  puts url
 		  exec_get_command(url).body
 		end
-		
+
 		# 画像取得
 		get '/get_img/:filename' do
 		  content_type 'image/jpeg'
@@ -127,25 +129,25 @@ EventMachine.run do
 		  puts url
 		  exec_get_command(url).body
 		end
-		
+
 		# ライブビュー開始
 		get '/start_liveview' do
 		  content_type 'text/xml'
 		  exec_get_command(@@exec_misc_start_liveivew).body
 		end
-		
+
 		# ライブビュー終了
 		get '/stop_liveview' do
 		  content_type 'text/xml'
 		  exec_get_command(@@exec_misc_stop_liveivew).body
 		end
-		
+
 		# 撮影
 		get '/takemotion' do
 		  content_type 'text/xml'
 		  exec_get_command(@@exec_takemotion).body
 		end
-		
+
 		# コマンド実行 get
 		def exec_get_command(command)
 		  host = "http://192.168.0.10"
@@ -157,7 +159,7 @@ EventMachine.run do
 			http = Net::HTTP.new(uri.host, uri.port)
 			return http.get(uri.request_uri, header)
 		end
-		
+
 		# コマンド実行 post
 		def exec_post_command(command, body)
 		  host = "http://192.168.0.10"
@@ -166,7 +168,7 @@ EventMachine.run do
 				"User-Agent" => user_agent
 			}
 			uri = URI("#{host}#{command}")
-		
+
 		  return Net::HTTP.post_form(uri, body)
 		end
 	end
@@ -192,8 +194,8 @@ EventMachine.run do
 			end
 		end
 	end
+
 	UdpServer.run
 
 	OPC_service.run! :port => 4567 if "opc_service.rb" == $0
 end
-
