@@ -9,7 +9,9 @@
   "author": "tktk",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.13.3",
     "http": "0.0.0",
-    "websocket": "^1.0.22"
+    "websocket": "^1.0.22",
+    "ws": "^0.8.0"
   }
 }

@@ -20,12 +20,12 @@ class RTPParser
 
 			@ws.on :open do |event|
 				p [:open]
-				ws.send('hello')
+				@ws.send('hello')
 			end
 
-			@ws.on :message do |event|
-				p [:message, event.data]
-			end
+			#@ws.on :message do |event|
+			#	p [:message, event.data]
+			#end
 
 			@ws.on :close do |event|
 				p [:close, event.code, event.reason]
@@ -49,7 +49,7 @@ class RTPParser
 		}
 			#:enhance =>pkt[0].unpack("B*")[0][0..1]
 			#:JPEG_subframe =>0pkt[0].unpack("B*")[0][0..1]
-		# 先頭パケット
+		# 先頭パケット 拡張ヘッダを持つ
 		if hash[:X] == "1"
 			#拡張ヘッダの処理
 			#TODO とりあえず拡張ヘッダをスキップする
@@ -62,14 +62,13 @@ class RTPParser
 					break
 				end
 			end
-		# 最後のパケット
+		# 最後のパケットならばwebsocketに投げる
 		elsif hash[:M] == "1"
 			@@jpeg.push(pkt[12..-1])
 			base = Base64.strict_encode64(@@jpeg.join(""))
 			@@jpeg = []
 			connect if @ws.nil?
-			#@ws.send base
-			@ws.send "a"
+			@ws.send base
 			#File.write("test.txt", base)
 		# 途中パケット
 		else
