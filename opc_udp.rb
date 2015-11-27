@@ -2,7 +2,6 @@
 
 require 'socket'
 require 'rubygems'
-require 'websocket-client-simple'
 require 'eventmachine'
 require './opc_rtp_parser'
 
@@ -19,9 +18,6 @@ class UdpServer < EM::Connection
 	end
 
 	def self.run
-		# websocketコネクション
-		#@ws = WebSocket::Client::Simple.connect 'ws://localhost:3001'
-		
 		# UDPサーバー起動
 		EM::run do
 			EM::open_datagram_socket(@@host, @@port, self)

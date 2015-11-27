@@ -8,7 +8,6 @@ require 'sinatra/reloader'
 require 'thin'
 require 'em-websocket'
 require 'rtp'
-require 'websocket-client-simple'
 
 require './opc_udp'
 
@@ -170,28 +169,6 @@ EventMachine.run do
 			uri = URI("#{host}#{command}")
 
 		  return Net::HTTP.post_form(uri, body)
-		end
-	end
-
-	# WebSockets server
-	@clients = []
-
-	EM::WebSocket.start(:host => '0.0.0.0', :port => '3001') do |ws|
-		ws.onopen do |handshake|
-			@clients << ws
-			ws.send "Connected to #{handshake.path}"
-		end
-
-		ws.onclose do
-			ws.send "Closed"
-			@clients.delete ws
-		end
-
-		ws.onmessage do |msg|
-			puts "Received Message: "
-			@clients.each do |socket|
-				socket.send msg
-			end
 		end
 	end
 

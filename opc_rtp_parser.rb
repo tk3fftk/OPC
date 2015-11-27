@@ -1,5 +1,6 @@
 # encoding: utf-8
-require 'websocket-client-simple'
+require 'faye/websocket'
+require 'eventmachine'
 
 class RTPParser
 	# JPEGサブフレームを貯める
@@ -11,7 +12,25 @@ class RTPParser
 
 	def connect
 		# websocketコネクション
-		@ws = WebSocket::Client::Simple.connect 'ws://localhost:3001'
+		#@ws = WebSocket::Client::Simple.connect 'ws://localhost:8080'
+		EM.run {
+			@ws = Faye::WebSocket::Client.new('ws://localhost:8080', [], {
+				:headers => {'User-Agent' => 'ruby'}
+			})
+
+			@ws.on :open do |event|
+				p [:open]
+				ws.send('hello')
+			end
+
+			@ws.on :message do |event|
+				p [:message, event.data]
+			end
+
+			@ws.on :close do |event|
+				p [:close, event.code, event.reason]
+			end	
+		}
 	end
 
 	def parse pkt
@@ -49,7 +68,8 @@ class RTPParser
 			base = Base64.strict_encode64(@@jpeg.join(""))
 			@@jpeg = []
 			connect if @ws.nil?
-			@ws.send base
+			#@ws.send base
+			@ws.send "a"
 			#File.write("test.txt", base)
 		# 途中パケット
 		else
