@@ -9,7 +9,10 @@
       <div id="form">
         <input type="text" id="message">
         <button id="disconnect">Disconnect</button>
-      </div>
+			</div>
+			<div>
+				<img id="liveview" src="">
+			</div>
     </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -27,7 +30,9 @@
             addMessage("Socket Status: " + socket.readyState + " (closed)");
           }
           socket.onmessage = function(msg) {
-            addMessage("Received: " + msg.data);
+						//addMessage("Received: " + msg.data);
+						updateImg(msg.data);
+						//socket.close();
           }
         } catch(exception) {
           addMessage("Error: " + exception);
@@ -35,7 +40,11 @@
       }
       function addMessage(msg) {
         $("#chat-log").append("<p>" + msg + "</p>");
-      }
+			}
+			function updateImg(msg){
+				var img = "data:image/jpeg;base64," + msg;	
+				$("#liveview").attr("src", img);
+			}
       function send() {
         var text = $("#message").val();
         console.log("send");
