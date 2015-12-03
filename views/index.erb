@@ -4,21 +4,23 @@
   </head>
   <body>
     <div class="container">
-      <h1>WebSockets Chat App</h1>
+      <h1>OPC Web Interface</h1>
+      <button id="disconnect">Disconnect</button>
       <div id="chat-log"></div>
-      <div id="form">
-        <input type="text" id="message">
-        <button id="disconnect">Disconnect</button>
-			</div>
 			<div>
+				<button id="liveview_start">Start Liveview</button>
+				<button id="liveview_stop">Stop Liveview</button>
+				<button id="take_motion">Take</button>
+				<br>
 				<img id="liveview" src="">
 			</div>
     </div>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>
-      var socket, host;
-      host = "ws://192.168.0.113:8080";
+			var socket, host;
+			var addr = "192.168.0.113";
+      host = "ws://" + addr + ":8080" ;
       function connect() {
         try {
           socket = new WebSocket(host);
@@ -45,29 +47,21 @@
 				var img = "data:image/jpeg;base64," + msg;	
 				$("#liveview").attr("src", img);
 			}
-      function send() {
-        var text = $("#message").val();
-        console.log("send");
-        if (text == '') {
-          addMessage("Please Enter a Message");
-          return;
-        }
-        try {
-          socket.send(text);
-          addMessage("Sent: " + text)
-        } catch(exception) {
-          addMessage("Failed To Send")
-        }
-        $("#message").val('');
-      }
       $(function() {
         connect();
       });
-      $('#message').keypress(function(event) {
-        if (event.keyCode == '13') { send(); }
-      });
       $("#disconnect").click(function() {
         socket.close()
+      });
+			$("#liveview_start").click(function() {
+				$.get("http://" + addr + ":4567/switch_cameramode/rec" );
+				$.get("http://" + addr + ":4567/start_liveview" );
+      });
+			$("#liveview_stop").click(function() {
+				$.get("http://" + addr + ":4567/stop_liveview" );
+      });
+			$("#take_motion").click(function() {
+				$.get("http://" + addr + ":4567/takemotion" );
       });
     </script>
   </body>
