@@ -19,7 +19,7 @@ class RTPParser
 
 			@ws.on :open do |event|
 				p [:open]
-				@ws.send('hello')
+				#@ws.send('hello')
 			end
 
 			@ws.on :close do |event|
