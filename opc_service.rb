@@ -171,7 +171,6 @@ class OPC_service < Sinatra::Application
 end
 
 # サーバ群起動
-begin
 EventMachine.run do
 	OPC_service.run! :port => 4567 if "opc_service.rb" == $0
 	UdpServer.run
